@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="producer" class="com.aliyun.openservices.ons.api.bean.ProducerBean"
+        init-method="start" destroy-method="shutdown">
+        <property name="properties">
+            <map>
+                <entry key="ProducerId" value="PID_aaronMqDemo" /> <!-- PID,请替换 -->
+                <entry key="AccessKey" value="LTAI428dRA2UzLpV" /> <!-- ACCESS_KEY,请替换 -->
+                <entry key="SecretKey" value="JpvN8p1iX8avVaxMQ9TBQKB6LpKwqL" /> <!-- SECRET_KEY,请替换 -->
+                <!--PropertyKeyConst.ONSAddr 请根据不同Region进行配置
+                 公网测试: http://onsaddr-internet.aliyun.com/rocketmq/nsaddr4client-internet
+                 公有云生产: http://onsaddr-internal.aliyun.com:8080/rocketmq/nsaddr4client-internal
+                 杭州金融云: http://jbponsaddr-internal.aliyun.com:8080/rocketmq/nsaddr4client-internal
+                 深圳金融云: http://mq4finance-sz.addr.aliyun.com:8080/rocketmq/nsaddr4client-internal -->
+                <entry key="ONSAddr" value="http://onsaddr-internet.aliyun.com/rocketmq/nsaddr4client-internet"/>
+            </map>
+        </property>
+    </bean>
+
+    <!-- 无序MQ配置 -->
+    <bean id="producerOne" class="com.alibaba.ons.message.example.common.producer.BaseProducer" init-method="init" destroy-method="shutdown">
+        <property name="producerId" value="PID_aaronMqDemo"/>
+        <property name="config" ref="mQConnectConfig"/>
+    </bean>
+
+    <!-- 有序MQ配置 -->
+    <bean id="producerOrderOne" class="com.alibaba.ons.message.example.common.producer.BaseOrderProducer" init-method="init" destroy-method="shutdown">
+        <property name="producerId" value="PID_aaronMqDemo"/>
+        <property name="config" ref="mQConnectConfig"/>
+    </bean>
+
+    <!-- 事务MQ配置 -->
+    <bean id="producerTransactionOne" class="com.alibaba.ons.message.example.common.producer.BaseTransactionProducer" init-method="init" destroy-method="shutdown">
+        <property name="producerId" value="PID_aaronMqDemo"/>
+        <property name="config" ref="mQConnectConfig"/>
+        <property name="checker" ref="checker"/>
+    </bean>
+
+    <bean id="mQConnectConfig" class="com.alibaba.ons.message.example.common.MQConnectConfig">
+        <property name="accessKey" value="LTAI428dRA2UzLpV"/>
+        <property name="secretKey" value="JpvN8p1iX8avVaxMQ9TBQKB6LpKwqL"/>
+        <property name="onsAddr" value="http://onsaddr-internet.aliyun.com/rocketmq/nsaddr4client-internet"/>
+    </bean>
+
+
+    <!--消息检查器-->
+    <bean id="checker" class="com.alibaba.ons.message.example.producer.LocalTransactionCheckerImpl"/>
+</beans>

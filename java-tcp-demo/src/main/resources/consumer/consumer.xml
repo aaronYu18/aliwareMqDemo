@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <bean id="consumer" class="com.aliyun.openservices.ons.api.bean.ConsumerBean"
+          init-method="start" destroy-method="shutdown">
+        <property name="properties">
+            <map>
+                <entry key="ConsumerId" value="CID_aaronMqDemo"/> 
+                <entry key="AccessKey" value="LTAI428dRA2UzLpV"/> <!-- ACCESS_KEY,请替换 -->
+                <entry key="SecretKey" value="JpvN8p1iX8avVaxMQ9TBQKB6LpKwqL"/><!-- SECRET_KEY,请替换 -->
+                <!--PropertyKeyConst.ONSAddr 请根据不同Region进行配置
+                  公网测试: http://onsaddr-internet.aliyun.com/rocketmq/nsaddr4client-internet
+                  公有云生产: http://onsaddr-internal.aliyun.com:8080/rocketmq/nsaddr4client-internal
+                  杭州金融云: http://jbponsaddr-internal.aliyun.com:8080/rocketmq/nsaddr4client-internal
+                  深圳金融云: http://mq4finance-sz.addr.aliyun.com:8080/rocketmq/nsaddr4client-internal -->
+                <entry key="ONSAddr" value="http://onsaddr-internet.aliyun.com/rocketmq/nsaddr4client-internet"/>
+            </map>
+        </property>
+
+        <property name="subscriptionTable">
+            <map>
+                <entry value-ref="messageListener">
+                    <key>
+                        <bean class="com.aliyun.openservices.ons.api.bean.Subscription">
+                            <property name="topic" value="aaron_mq_demo"/> 
+                            <property name="expression" value="*"/><!-- MessageType名: 多个messageType 用 “||”分割 -->
+                        </bean>
+                    </key>
+                </entry>
+            </map>
+
+        </property>
+    </bean>
+
+
+
+    <!-- 无序MQ配置 -->
+    <bean id="consumerOne" class="com.alibaba.ons.message.example.common.consumer.BaseConsumer" init-method="init" destroy-method="shutdown">
+        <property name="maxReconsumeTimes" value="5"/>
+        <property name="topic" value="aaron_mq_demo"/>
+        <property name="expression" value="*"/><!-- MessageType名: 多个messageType 用 “||”分割 -->
+        <property name="consumerId" value="CID_aaronMqDemo"/> 
+        <property name="config" ref="mQConnectConfig"/>
+        <property name="messageListener" ref="messageListener"/>
+    </bean>
+
+
+    <!-- 有序MQ配置 -->
+    <bean id="consumerOrderOne" class="com.alibaba.ons.message.example.common.consumer.BaseOrderConsumer" init-method="init" destroy-method="shutdown">
+        <property name="maxReconsumeTimes" value="5"/>
+        <property name="topic" value="aaron_mq_demo"/> 
+        <property name="expression" value="*"/>     <!-- MessageType名: 多个messageType 用 “||”分割 -->
+        <property name="consumerId" value="CID_aaronMqDemo"/>
+        <property name="config" ref="mQConnectConfig"/>
+        <property name="messageListener" ref="messageOrderListener"/>
+    </bean>
+
+    <!-- 事务MQ配置 -->
+    <bean id="consumerTransactionOne" class="com.alibaba.ons.message.example.common.consumer.BaseOrderConsumer" init-method="init" destroy-method="shutdown">
+        <property name="maxReconsumeTimes" value="5"/>
+        <property name="topic" value="aaron_mq_demo"/>
+        <property name="expression" value="*"/>     <!-- MessageType名: 多个messageType 用 “||”分割 -->
+        <property name="consumerId" value="CID_aaronMqDemo"/>
+        <property name="config" ref="mQConnectConfig"/>
+        <property name="messageListener" ref="messageOrderListener"/>
+    </bean>
+
+
+    <bean id="mQConnectConfig" class="com.alibaba.ons.message.example.common.MQConnectConfig">
+        <property name="accessKey" value="LTAI428dRA2UzLpV"/>
+        <property name="secretKey" value="JpvN8p1iX8avVaxMQ9TBQKB6LpKwqL"/>
+        <property name="onsAddr" value="http://onsaddr-internet.aliyun.com/rocketmq/nsaddr4client-internet"/>
+    </bean>
+
+
+    <!-- 消息处理器 -->
+    <bean id="messageListener" class="com.alibaba.ons.message.example.consumer.MessageListenerImpl"/>
+    <bean id="messageOrderListener" class="com.alibaba.ons.message.example.consumer.MessageOrderListenerImpl"/>
+
+</beans>
